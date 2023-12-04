@@ -117,7 +117,7 @@ As a matter of fact, this is the Remote Desktop certificate on server `10.1.1.1`
 echo 'MIIJuQIBAzCCCXUGCSqGSIb3DQEHA.......' | base64 -d > rdp.pfx
 ```
 
-We can if the file is valid PKCS #12 (`.pfx`) with following command (password is same as the `<tool name>` from question 3):
+We can check if the file is valid PKCS #12 (`.pfx`) with following command (password is same as the `<tool name>` from question 3):
 
 ```
 $ openssl pkcs12 -info -in rdp.pfx
@@ -146,13 +146,13 @@ After we have the RDP certificate that contains private key used to encrypt RDP 
 openssl pkcs12 -in rdp.pfx -nocerts -out rdp_key.pem -nodes
 ```
 
-After this we have the private key: `rdp_key.pem` which we can load into the Wireshark by navigating to `Edit->Preferences->Protocols->TLS`, click on `Edit...` button next to `RSA keys list` and enter `10.1.1.1` under `IP address`, `3389` under `Port`, `tpkt` under `Port` and path to RDP private key `rdp_key.pem` under the `Key file` field.
+After this we have the private key: `rdp_key.pem` which we can load into the Wireshark by navigating to `Edit->Preferences->Protocols->TLS`, click on `Edit...` button next to `RSA keys list` and enter `10.1.1.1` under `IP address`, `3389` under `Port`, `tpkt` under `Protocol` and path to RDP private key `rdp_key.pem` under the `Key file` field.
 
 ![](img/20231203210046.png)
 
 It's about good time to take a rest now and get some coffee...
 
-After we have private key to decrypt RDP traffic, we can `replay` it and see what was actually happening as if we're watching the video. For this we need to extract the data and process it via [PyRDP](https://github.com/GoSecure/pyrdp).
+After we have private key to decrypt RDP traffic, we can replay it and see what was actually happening as if we're watching the video. For this we need to extract the data and process it via [PyRDP](https://github.com/GoSecure/pyrdp).
 
 1. In the Wireshark, set display filter to `rdp` to filter all the related traffic
 
@@ -179,9 +179,9 @@ After we have private key to decrypt RDP traffic, we can `replay` it and see wha
 5. Next step is to convert the `rdp_pdus.pcap` file which is essentially `Network Capture (PCAP) in Exported PDUs Layer 7 format` using the `pyrdp-convert.py`:
 
     ```
-    $ python pyrdp-convert.py  ../../rdp_pdus.cap
+    $ python pyrdp-convert.py  rdp_pdus.cap
 
-    [*] Analyzing PCAP '../../rdp_pdus.pcap' ...
+    [*] Analyzing PCAP 'rdp_pdus.pcap' ...
         - 10.0.0.2:55510 -> 10.1.1.1:3389 : plaintext
     [*] Processing 10.0.0.2:55510 -> 10.1.1.1:3389
     38% (2828 of 7405) |####################################                                               | Elapsed Time: 0:00:00 ETA:   0:00:00
