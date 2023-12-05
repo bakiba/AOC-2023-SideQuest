@@ -33,7 +33,7 @@ After uploading all 4 QR codes to the site under the Task 5 "View Site" button, 
 
 Here we learn that the Bandit Yeti obtained some Wi-Fi chit-chat capture from Van Spy character who infiltrated elf’s network and planted backdoor. 
 
-From the "Tasks Files" button we obtained file `VanSpy.pcapng.zip` and opening the capture in Wireshark we see it is 802.11 traffic capture
+From the "Tasks Files" button we obtained file `VanSpy.pcapng.zip` and opening the capture in Wireshark we see it is 802.11 traffic capture:
 
 ![](img/20231203165526.png)
 
