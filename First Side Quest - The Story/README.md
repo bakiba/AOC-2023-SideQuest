@@ -42,7 +42,15 @@ From the "Tasks Files" button we obtained file `VanSpy.pcapng.zip` and opening t
 At this time, we can already answer first question by looking at the SSID info in the packets. We can also obtain this answer by using `aircrack-ng`, however `aircrack-ng` does not recognize `.pcapng` file format so to translate it to `.pcap` we executed:
 
 ```
-tcpdump -r VanSpy.pcapng -w VanSpy.pcap
+$ tcpdump -r VanSpy.pcapng -w VanSpy.pcap
+$ aircrack-ng VanSpy.pcap
+Reading packets, please wait...
+Opening VanSpy.pcap
+Read 45243 packets.
+
+   #  BSSID              ESSID                     Encryption
+
+   1  22:C7:12:C7:E2:35  <Wi-Fi name>              WPA (1 handshake)
 ```
 
 ### 2. What's the password to access the Wi-Fi network?
@@ -52,7 +60,15 @@ Answer to second question will require bit of investigation followed by some dic
 To answer the first question, we used `aircrack-ng VanSpy.pcap` which showed us not only SSID but also encryption that is used: `WPA (1 handshake)`. This means that the captured traffic contains WPA handshakes and we can try guessing the password:
 
 ```
-aircrack-ng -w /usr/share/wordlists/rockyou.txt -b 22:c7:12:c7:e2:35 VanSpy.pcap
+$ aircrack-ng -w /usr/share/wordlists/rockyou.txt -b 22:c7:12:c7:e2:35 VanSpy.pcap
+                               Aircrack-ng 1.7 
+
+      [00:00:11] 35017/14344392 keys tested (3175.55 k/s) 
+
+      Time left: 1 hour, 15 minutes, 6 seconds                   0.24%
+
+                           KEY FOUND! [ <Wi-Fi password> ]
+
 ```
 
 After a few seconds, we got our Wi-Fi password!
@@ -114,7 +130,7 @@ And at the end `base64` encoded the file:
 As a matter of fact, this is the Remote Desktop certificate on server `10.1.1.1` that contains the private key used encrypt RDP traffic. Let's get that certificate by copying the base64 text from TCP stream, decoding and saving it as `.pfx` file (base64 encoded string was shortened for readability):
 
 ```
-echo 'MIIJuQIBAzCCCXUGCSqGSIb3DQEHA.......' | base64 -d > rdp.pfx
+$ echo 'MIIJuQIBAzCCCXUGCSqGSIb3DQEHA.......' | base64 -d > rdp.pfx
 ```
 
 We can check if the file is valid PKCS #12 (`.pfx`) with following command (password is same as the `<tool name>` from question 3):
@@ -143,7 +159,7 @@ MIIFLTBXBgkqhkiG9w0BBQ0wSjApBgkqhkiG9w0BBQwwHAQI3rkTGlGhsO8CAggA
 After we have the RDP certificate that contains private key used to encrypt RDP traffic, we need to extract just the private key:
 
 ```
-openssl pkcs12 -in rdp.pfx -nocerts -out rdp_key.pem -nodes
+$ openssl pkcs12 -in rdp.pfx -nocerts -out rdp_key.pem -nodes
 ```
 
 After this we have the private key: `rdp_key.pem` which we can load into the Wireshark by navigating to `Edit->Preferences->Protocols->TLS`, click on `Edit...` button next to `RSA keys list` and enter `10.1.1.1` under `IP address`, `3389` under `Port`, `tpkt` under `Protocol` and path to RDP private key `rdp_key.pem` under the `Key file` field.
